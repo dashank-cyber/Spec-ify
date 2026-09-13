@@ -1,0 +1,11 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment (if you add one later)
+venv/
+env/
+
+# VS Code settings (optional — some teams commit this, some don't)
+.vscode/
+
