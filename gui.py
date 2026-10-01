@@ -108,16 +108,25 @@ class SpecifyApp(tk.Tk):
     def _render_weight_sliders(self):
         for widget in self.weight_frame.winfo_children():
             widget.destroy()
+
         self.weight_vars = {}
         criteria = scoring.criteria_for(self.device_type.get())
-        for i, (key, (label, _)) in enumerate(criteria.items()):
-            var = tk.IntVar(value=3)  # default mid-importance
-            self.weight_vars[key] = var
-            ttk.Label(self.weight_frame, text=label, width=18).grid(row=i, column=0, sticky="w", pady=4)
-            ttk.Scale(self.weight_frame, from_=0, to=5, orient="horizontal",
-                      variable=var, length=220).grid(row=i, column=1, padx=8)
-            ttk.Label(self.weight_frame, textvariable=var, width=3).grid(row=i, column=2)
 
+        for i, (key, (label, _)) in enumerate(criteria.items()):
+            var = tk.IntVar(value=3)
+            self.weight_vars[key] = var
+
+            ttk.Label(self.weight_frame,text=label,width=18).grid(row=i, column=0, sticky="w", pady=4)
+            value_label = ttk.Label(self.weight_frame,text="0",width=3)
+            value_label.grid(row=i,column=2,padx=(4, 0),sticky="w")
+
+            def update_value(value, variable=var, display=value_label):
+                rounded = round(float(value))
+                variable.set(rounded)
+                display.config(text=str(rounded))
+
+            ttk.Scale(self.weight_frame,from_=0,to=5,orient="horizontal",length=220,command=update_value).grid(row=i, column=1, padx=8)
+    
     def _on_type_change(self):
         self._render_category_checkboxes()
         self._render_weight_sliders()
@@ -180,7 +189,7 @@ class SpecifyApp(tk.Tk):
             price = f"{int(device['price_min']):,} - {int(device['price_max']):,}"
             cats = ", ".join(device["categories"])
             self.tree.insert("", "end", iid=str(device["id"]),
-                              values=("[ ]", i, device["model"], device["score"], price, cats))
+                              values=("[ ]", i, device["model"], f"{device['score']:.2f}", price, cats))
 
         self.tree.bind("<Button-1>", self._on_tree_click)
         self.tree.pack(fill="both", expand=True, side="left")
